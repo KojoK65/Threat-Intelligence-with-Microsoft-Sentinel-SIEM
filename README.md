@@ -1,248 +1,165 @@
-# Building a SOC + Honeynet in Azure (Live Traffic)  
+# 🛡️ Building a Cloud SOC + Honeynet in Microsoft Azure (Live Attack Traffic)
+
 ![Cloud Honeynet / SOC](https://i.imgur.com/ZWxe03e.jpg)
 
-## Overview
+## 📘 Overview
 
-In this project, I built a **mini honeynet** in **Microsoft Azure** to simulate a real-world security operations center (SOC). The honeynet was designed to attract and log malicious traffic, allowing me to monitor and analyze security events using **Microsoft Sentinel** and **Azure Monitor**. The project demonstrates the full process of building a cloud-based SOC, from initial setup to security hardening, and then analyzing the results to assess the impact of security controls.
+This project demonstrates how I built a **live cloud-based honeynet** in Microsoft Azure to capture **real-world cyberattacks**, analyze them in **Microsoft Sentinel**, and then **harden the environment** to measure the impact of security controls.
 
+I intentionally deployed a vulnerable Windows VM to the internet, collected brute-force and scanning activity from global attackers, visualized the data using Sentinel workbooks, and then secured the environment using NSGs, firewalls, and private endpoints.
 
-  
-### Before Hardening (Insecure Environment)
-
-In the initial setup, all resources were deployed with **public endpoints visible to the internet**. Both the **Network Security Groups** and firewalls on the VMs were wide open to simulate a vulnerable environment. This setup allowed the honeynet to attract malicious traffic, which was then logged and analyzed.
-
-**![Architecture Diagram - Before Hardening](path_to_image_before_hardening.png)**  
-*Insert Image Here: Architecture before hardening (VNet, NSG, open firewalls, public access)*
-
-### After Hardening (Secured Environment)
-
-Security controls were implemented to harden the environment:
-
-- **Network Security Groups (NSGs)** were configured to block all inbound traffic except from a designated **admin workstation**.
-- **Private Endpoints** were used for resources like **Azure Key Vault** and **Azure Storage Account**, ensuring no public exposure.
-- **Built-in firewalls** were enabled on all resources to prevent unauthorized access.
-
-**![Architecture Diagram - After Hardening](path_to_image_after_hardening.png)**  
-*Insert Image Here: Architecture after security controls were applied (NSGs hardened, private endpoints, firewalls enabled)*
-
-# Building a SOC + Honeynet in Azure (Live Attack Traffic)
-
-## 📌 Overview
-
-In this project, I built a cloud-based **honeynet** in Microsoft Azure designed to attract **real-world cyberattacks**, capture logs, forward them into a **Log Analytics Workspace**, and analyze them with **Microsoft Sentinel**.  
-I intentionally exposed a Windows VM to the public internet, monitored attacks, created an attack map, and then documented the before/after impact.
-
-This project demonstrates hands-on experience in:
-
-- Cloud Security (Azure)
-- SIEM (Microsoft Sentinel)
-- Log Analytics (LAW)
-- Windows Event Log analysis
-- Threat detection & attack visualization
-- Network security (NSGs, firewalls)
-- KQL (Kusto Query Language)
-
-Below is the full walkthrough of the project *including exactly where screenshots belong* and why each step matters.
+This project showcases the full lifecycle of SOC work:  
+**exposure → detection → investigation → enrichment → hardening → validation.**
 
 ---
 
-# 🪪 **Step-by-Step Documentation (with Screenshot Instructions)**
+# 🧰 Skills Demonstrated
+
+- Azure Cloud Architecture  
+- Security Operations (SOC)  
+- Microsoft Sentinel (SIEM)  
+- Log Analytics Workspace (LAW)  
+- Windows Event Log Analysis  
+- Kusto Query Language (KQL)  
+- Threat Detection & Investigation  
+- Attack Surface Reduction  
+- NSG, Firewall & Private Endpoint Hardening  
+- Visualizing attacker behavior & global pattern analysis  
 
 ---
 
-## **1) VM Deployed & Reachable (Starting Point)**
+# 🏗️ Architecture
 
-### 📍 Where to Screenshot  
-Azure Portal → **Virtual Machines** → Your VM → **Overview**
+## **Before Hardening (Deliberately Vulnerable)**
 
-### 📸 What to Capture  
-- VM name  
-- VM OS  
-- VM size  
-- Public IP address  
-- Resource Group  
-- **Connect → RDP** button  
-(Or the RDP dialog without credentials)
+To attract real attackers, I deployed the VM with:
 
-### 💡 Why  
-Shows the honeypot exists, is intentionally exposed, and reachable from the internet.
+- Public RDP exposure  
+- NSGs allowing **Any / Any / 0.0.0.0/0**  
+- Windows Firewall disabled  
+- Public endpoints on key services  
 
-### 🖼️ Screenshot Filename  
-`01-vm-overview.png`  
-`02-vm-connect.png` (optional RDP dialog)
+The goal was to **simulate a misconfigured production environment** and observe how attackers behave when given access to an exposed system.
 
-### 📝 README Placement  
-![VM Overview](assets/images/01-vm-overview.png)  
-*VM overview showing public IP and RDP connection option.*
+**Diagram:**  
+`/assets/diagrams/before-hardening.png`
 
 ---
 
-## **2) NSG / Networking — Intentionally Open to the Internet**
+## **After Hardening (Secure Configuration)**
 
-### 📍 Where to Screenshot  
-Azure Portal → Virtual Machines → **Networking** →  
-Click the NSG link → **Inbound Security Rules**
+Once data was collected, I secured the entire environment:
 
-### 📸 What to Capture  
-- Inbound NSG rules showing **Any / Any / 0.0.0.0/0**  
-- NIC + VNet mapping
+- NSGs locked down to a single trusted admin IP  
+- Windows Firewall fully enabled  
+- All Azure resources moved behind **Private Endpoints**  
+- Public access removed  
+- RDP access isolated  
+- Continuous monitoring enabled through Sentinel  
 
-### 💡 Why  
-Proves the VM was intentionally vulnerable to attract live attacks.
+The goal was to demonstrate how security controls **dramatically reduce** malicious traffic while maintaining operational functionality.
 
-### 🖼️ Screenshot Filename  
-`03-nsg-inbound.png`
-
-### 📝 README Placement  
-![NSG Inbound Rules](assets/images/03-nsg-inbound.png)  
-*NSG rules intentionally left wide open for honeypot exposure.*
+**Diagram:**  
+`/assets/diagrams/after-hardening.png`
 
 ---
 
-## **3) Windows Firewall Disabled Inside the VM**
+# 📊 Key Findings
 
-### 📍 Where to Screenshot  
-Inside RDP session → **wf.msc**  
-(or Windows Firewall control panel)
+### 🔥 Before Hardening
+During the exposed phase, the honeypot collected:
 
-### 📸 What to Capture  
-All three profiles:  
-- Domain = Off  
-- Private = Off  
-- Public = Off  
+- **Thousands of brute-force login attempts** within the first 24 hours  
+- Attacks from **40+ countries**  
+- Repeated attempts using common usernames like:  
+  `admin`, `administrator`, `test`, `user1`  
+- Continuous port scanning and probing of RDP/SMB services  
 
-### 💡 Why  
-Shows the VM was configured to be deliberately vulnerable.
-
-### 🖼️ Screenshot Filename  
-`04-windows-firewall-off.png`
-
-### 📝 README Placement  
-![Windows Firewall Off](assets/images/04-windows-firewall-off.png)  
-*Windows Firewall intentionally disabled to increase honeypot visibility.*
+This validated that **any public-facing VM is immediately targeted** by automated bots and malicious actors.
 
 ---
 
-## **4) Failed Login Events (Event Viewer Evidence)**
+### 🔒 After Hardening
+Once hardening was implemented:
 
-### 📍 Where to Screenshot  
-Inside VM → Event Viewer →  
-Windows Logs → **Security** → Filter Event ID **4625**
+- **100% reduction** in unauthorized RDP login attempts  
+- No new failed logon (4625) events  
+- Public traffic dropped to zero  
+- All services became reachable only from trusted sources  
+- Attack surface was fully eliminated  
 
-### 📸 What to Capture  
-Event 4625 entries showing:  
-- Account Name  
-- Failure Reason  
-- Source IP address  
-
-### 💡 Why  
-This is direct proof attackers are interacting with the honeypot.
-
-### 🖼️ Screenshot Filename  
-`05-eventviewer-4625.png`
-
-### 📝 README Placement  
-![Event Viewer 4625](assets/images/05-eventviewer-4625.png)  
-*Failed login attempts (4625) captured from live attackers.*
+This demonstrates a complete SOC remediation cycle with **measurable security improvement**.
 
 ---
 
-## **5) Log Analytics Workspace (LAW) Created & Sentinel Connected**
+# 🔍 Example KQL Queries Used
 
-### 📍 Where to Screenshot  
-- Azure Portal → **Log Analytics Workspaces** → Overview  
-- Azure Portal → **Microsoft Sentinel** → Overview (show linked workspace)
+### **1. Detecting Failed RDP Logons (Event ID 4625)**
 
-### 📸 What to Capture  
-- Workspace Name  
-- Workspace ID  
-- Region  
-- Sentinel connected to LAW  
-- Data connectors screen (optional)
+```kql
+SecurityEvent
+| where EventID == 4625
+| extend IPAddress = tostring(parse_json(AdditionalFields).IpAddress)
+| summarize FailedLogins = count() by IPAddress
+| sort by FailedLogins desc
 
-### 💡 Why  
-Confirms the SOC backend pipeline is set up.
+## 🌐 Geo-IP Enrichment for Attack Mapping
 
-### 🖼️ Screenshot Filenames  
-`06-law-overview.png`  
-`07-sentinel-connected.png`
+### KQL Query
 
-### 📝 README Placement  
-![LAW Overview](assets/images/06-law-overview.png)  
-*Log Analytics Workspace hosting all ingested logs.*
+```kql
+SecurityEvent
+| where EventID == 4625
+| extend IP = tostring(parse_json(AdditionalFields).IpAddress)
+| lookup kind=leftouter geoWatchlist on $left.IP == $right.ip
+| summarize count() by Country
 
-![Sentinel Connected](assets/images/07-sentinel-connected.png)  
-*Microsoft Sentinel connected to the environment.*
+These queries powered the interactive **attack map**, visualizing which countries were actively targeting the honeypot.
 
 ---
 
-## **6) Azure Monitor Agent Installed & Data Collection Rule Configured**
+# 🌍 Attack Map (Sentinel Workbook)
 
-### 📍 Where to Screenshot  
-Azure Portal → Virtual Machines → Your VM →  
-**Extensions + applications**  
-AND  
-Azure Monitor / Sentinel → Data Collection Rules
+Using a custom watchlist and KQL enrichment, I created a workbook that plotted attacker origins globally.
 
-### 📸 What to Capture  
-- Azure Monitor Agent status = **Installed**  
-- DCR (example: `DCR-Windows-VM`)  
-- Data source = Windows Security Events → All Security Events  
+This revealed real-world attack distribution, which is useful for:
 
-### 💡 Why  
-Shows the pipeline forwarding logs into LAW/Sentinel.
+- Threat intelligence  
+- Reporting  
+- SOC dashboards  
+- Understanding attacker access patterns  
 
-### 🖼️ Screenshot Filenames  
-`08-ama-extension.png`  
-`09-dcr-created.png`
-
-### 📝 README Placement  
-![AMA Installed](assets/images/08-ama-extension.png)  
-*Azure Monitor Agent installed on honeypot VM.*
-
-![Data Collection Rule](assets/images/09-dcr-created.png)  
-*DCR created to send Windows Security events to Sentinel.*
+**Screenshot:**  
+`/assets/images/attack-map.png`
 
 ---
 
-## **7) Watchlist Upload (Geo-IP Data) & Attack Map Workbook**
+# 🪪 Why This Project Matters
 
-### 📍 Where to Screenshot  
-**Watchlist Upload:**  
-Sentinel → Configuration → Watchlists → Your watchlist (alias “go”)
+This project replicates the real responsibilities of a SOC Analyst, including:
 
-**Attack Map Workbook:**  
-Sentinel → Workbooks → Windows VM Attack Map → Map View
+✔ Building and monitoring cloud assets  
+✔ Collecting and analyzing security logs  
+✔ Investigating alerts using a SIEM  
+✔ Correlating data using KQL  
+✔ Visualizing attacker patterns  
+✔ Hardening infrastructure  
+✔ Proving the impact of security controls  
 
-### 📸 What to Capture  
-- Watchlist row count + alias  
-- Workbook showing the global attack map  
-- Pins / heatmap of attacker locations
-
-### 💡 Why  
-This is the **visual proof** of real attackers hitting your honeypot.
-
-### 🖼️ Screenshot Filenames  
-`10-watchlist-go.png`  
-`11-attack-map-workbook.png`
-
-### 📝 README Placement  
-![Watchlist](assets/images/10-watchlist-go.png)  
-*Geo-IP watchlist imported for IP-to-location enrichment.*
-
-![Attack Map](assets/images/11-attack-map-workbook.png)  
-*Attack map showing live attacker geographic origins.*
+It demonstrates not only strong technical execution—but also an understanding of **why** each step matters from a security operations perspective.
 
 ---
 
-# 🎯 **Conclusion**
+# 🎯 Final Summary
 
-This project simulates a real SOC workflow:
+This Azure honeynet project demonstrates my ability to:
 
-- Deploy a vulnerable asset  
-- Capture attacker behavior  
-- Forward logs to a SIEM  
-- Analyze Windows & Linux security logs  
-- Create visualizations & detections  
-- Harden the environment  
-- Compare before/after results  
+- Deploy and manage Azure infrastructure  
+- Capture and investigate real cyberattacks  
+- Write KQL queries for detection and analytics  
+- Use Microsoft Sentinel effectively  
+- Build enriched visual dashboards  
+- Apply and validate security hardening  
+- Think like both an attacker *and* a defender  
+
+---
