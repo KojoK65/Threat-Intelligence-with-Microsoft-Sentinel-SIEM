@@ -102,8 +102,9 @@ SecurityEvent
 | extend IPAddress = tostring(parse_json(AdditionalFields).IpAddress)
 | summarize FailedLogins = count() by IPAddress
 | sort by FailedLogins desc
+```
 
-## 🌐 Geo-IP Enrichment for Attack Mapping
+### 🌐 **2. Geo-IP Enrichment for Attack Mapping**
 
 ### KQL Query
 
@@ -113,7 +114,7 @@ SecurityEvent
 | extend IP = tostring(parse_json(AdditionalFields).IpAddress)
 | lookup kind=leftouter geoWatchlist on $left.IP == $right.ip
 | summarize count() by Country
-
+```
 These queries powered the interactive **attack map**, visualizing which countries were actively targeting the honeypot.
 
 ---
