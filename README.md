@@ -5,18 +5,7 @@
 
 In this project, I built a **mini honeynet** in **Microsoft Azure** to simulate a real-world security operations center (SOC). The honeynet was designed to attract and log malicious traffic, allowing me to monitor and analyze security events using **Microsoft Sentinel** and **Azure Monitor**. The project demonstrates the full process of building a cloud-based SOC, from initial setup to security hardening, and then analyzing the results to assess the impact of security controls.
 
-This project is valuable for **SOC Analyst** and **Security Analyst** roles, as it shows practical experience in cloud security, incident detection, and the use of SIEM solutions for real-time monitoring and response.
 
-## Architecture Overview
-
-The architecture consists of the following components:
-
-- **Virtual Network (VNet)**: Segregates resources within Azure for controlled traffic flow.
-- **Network Security Group (NSG)**: Initially wide open to simulate real-world vulnerability, then hardened to block malicious traffic.
-- **Virtual Machines**: 2 Windows VMs and 1 Linux VM acting as honeypots to attract attacks.
-- **Log Analytics Workspace**: Centralized logging solution where all logs from the VMs and other resources are aggregated.
-- **Microsoft Sentinel**: Used to monitor logs, create incidents, and visualize attacks.
-- **Azure Key Vault & Storage Account**: Secure storage for sensitive data and logs.
   
 ### Before Hardening (Insecure Environment)
 
